@@ -28,6 +28,7 @@ class LunarLanderAI{
     
     // helper values
     this.total_died = 0
+    this.landed = 0
     this.generation_number = 1
     this.generation_timestamp = 0
     
@@ -58,6 +59,7 @@ class LunarLanderAI{
 
         if(this.checkIfLanded(spaceship, this.ground)){
           spaceship.landed()
+          this.landed += 1
           this.total_died += 1
         }
 
@@ -91,7 +93,8 @@ class LunarLanderAI{
       `Generation: ${this.generation_number}`,
       `Population Remaining: ${this.population.length - this.total_died}`,
       `Max Fitness: ${generation_best.fitness}`,
-      `Timestamp: ${this.generation_timestamp}`
+      `Timestamp: ${this.generation_timestamp}`,
+      `Landed: ${this.landed}`
     ])
   }
   
@@ -124,6 +127,8 @@ class LunarLanderAI{
     this.generation_number += 1
     this.total_died = 0
     this.generation_timestamp = 0
+    this.landed = 0
+
   }
   
   checkIfLanded(spaceship, ground){

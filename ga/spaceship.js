@@ -17,6 +17,7 @@ class SpaceShip{
     this.status = STATUS_ON
     this.fitness = 0
     this.is_best = false
+    this.above = false
     
     // set brain and target
     this.brain = brain
@@ -45,7 +46,12 @@ class SpaceShip{
     this.handleAction(action)
     
     this.fitness -= this._calcNormDist(this.body.position, this.target.position)
-    this.fitness -= 1
+    console.log((Math.abs(this.body.position.x - this.target.position.x)/400))
+    this.fitness -= (Math.abs(this.body.position.x - this.target.position.x)/450)
+    this.fitness += 0.03
+    if(Math.abs(this.body.position.x - this.target.position.x) <= 3 && this.above === false)
+      this.fitness += 10
+      this.above = true
   }
   
   think(){
@@ -68,6 +74,7 @@ class SpaceShip{
   handleAction(action){
     if(action != 0){
       this.thrust_applied = true
+      this.fitness -= (2/this.fuel)
     }else{
       this.thrust_applied = false
     }
@@ -119,11 +126,12 @@ class SpaceShip{
   }
     
   landed(){
-    this.fitness += 100
+    this.fitness += 1000
     this.status = STATUS_LANDED
     Composite.remove(world, this.body)
   }
   crashed(){
+    this.fitness -= 1000
     this.status = STATUS_CRASHED
     Composite.remove(world, this.body)
   }
