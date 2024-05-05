@@ -17,7 +17,8 @@ class SpaceShip{
     this.status = STATUS_ON
     this.fitness = 0
     this.is_best = false
-    this.above = false
+    this.lastDistance = 0
+    this.currentDistance = 0
     
     // set brain and target
     this.brain = brain
@@ -39,19 +40,22 @@ class SpaceShip{
     Composite.add(window.world, this.body)
   }
 
+  
   // applies appropriate thrust based on key press
   move(){
     if(this.fuel <= 0) return;
     const action = this.think()
     this.handleAction(action)
-    
-    this.fitness -= this._calcNormDist(this.body.position, this.target.position)
-    console.log((Math.abs(this.body.position.x - this.target.position.x)/400))
-    this.fitness -= (Math.abs(this.body.position.x - this.target.position.x)/450)
-    this.fitness += 0.03
-    if(Math.abs(this.body.position.x - this.target.position.x) <= 3 && this.above === false)
-      this.fitness += 10
-      this.above = true
+
+    // Punish based on horizontal distance from platform
+    this.fitness -= Math.abs(this.body.position.x - this.target.position.x)/989 * 1.4;  // Increased weight
+    // Punish based on vertical distance, but ensure balance
+    this.fitness -= Math.abs(this.body.position.y - this.target.position.y)/989 * 0.75; 
+
+    // Reward for speed
+    const velocity = Matter.Body.getVelocity(this.body)
+    const velocityReward = map(velocity.y, 0, 10, 0, 1) // map velocity to a value between 0 and 1
+    this.fitness += velocityReward * 0.1 // adjust the coefficient for velocity
   }
   
   think(){
@@ -74,7 +78,7 @@ class SpaceShip{
   handleAction(action){
     if(action != 0){
       this.thrust_applied = true
-      this.fitness -= (2/this.fuel)
+      this.fitness -= (1/this.fuel)
     }else{
       this.thrust_applied = false
     }
@@ -89,16 +93,19 @@ class SpaceShip{
         x: force.x,
         y: force.y
       })
+      this.fitness -= 0.05
       this.fuel -= FUEL_USAGE
     }
     
     if(action == 2){
       Matter.Body.setAngle(this.body, this.body.angle - ANGLE_DIFF)
+      this.fitness -= 0.005
       this.fuel -= FUEL_USAGE
     }
     
     if(action == 3){
       Matter.Body.setAngle(this.body, this.body.angle + ANGLE_DIFF)
+      this.fitness -= 0.005
       this.fuel -= FUEL_USAGE
     }
   }
@@ -126,12 +133,15 @@ class SpaceShip{
   }
     
   landed(){
+    // Punish for angle of landing
+    this.fitness -= this.body.angle * 20
+
     this.fitness += 1000
     this.status = STATUS_LANDED
     Composite.remove(world, this.body)
   }
   crashed(){
-    this.fitness -= 1000
+    this.fitness -= 500
     this.status = STATUS_CRASHED
     Composite.remove(world, this.body)
   }

@@ -82,8 +82,9 @@ class LunarLanderAI{
     let generation_best = this.population[0]
     this.population.forEach(spaceship => {
       spaceship.is_best = false
-      if(spaceship.fitness > generation_best.fitness)
-      generation_best = spaceship
+      if(spaceship.fitness > generation_best.fitness){
+        generation_best = spaceship
+      }
     })
     generation_best.is_best = true
       
@@ -94,7 +95,7 @@ class LunarLanderAI{
       `Population Remaining: ${this.population.length - this.total_died}`,
       `Max Fitness: ${generation_best.fitness}`,
       `Timestamp: ${this.generation_timestamp}`,
-      `Landed: ${this.landed}`
+      `Landed: ${this.landed}`,
     ])
   }
   
